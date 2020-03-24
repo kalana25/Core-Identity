@@ -34,6 +34,12 @@ namespace Identity_EmailVarification
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.ConfigureApplicationCookie(config =>
+            {
+                config.Cookie.Name = "Identity.cookie";
+                config.LoginPath = "/Home/Login";
+            });
+
             services.AddControllersWithViews();
 
         }

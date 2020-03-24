@@ -66,8 +66,17 @@ namespace Identity_EmailVarification.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(string username,string password)
+        public async Task<IActionResult> Login(string username,string password)
         {
+            var user = await userManager.FindByNameAsync(username);
+            if(user!=null)
+            {
+                var signInResult = await signinManager.PasswordSignInAsync(user, password, false, false);
+                if(signInResult.Succeeded)
+                {
+                    return RedirectToAction("Index");
+                }
+            }
             return View();
         }
 
