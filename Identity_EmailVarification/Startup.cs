@@ -9,12 +9,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NETCore.MailKit.Extensions;
+using NETCore.MailKit.Infrastructure.Internal;
+using NETCore.MailKit.Core;
+using Microsoft.Extensions.Configuration;
 using Identity_EmailVarification.Data;
 
 namespace Identity_EmailVarification
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+        public Startup(IConfiguration config)
+        {
+            configuration = config;
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -30,6 +39,7 @@ namespace Identity_EmailVarification
                 config.Password.RequireDigit = false;
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequireUppercase = false;
+                config.SignIn.RequireConfirmedEmail = true;
             })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
@@ -40,6 +50,12 @@ namespace Identity_EmailVarification
                 config.LoginPath = "/Home/Login";
             });
 
+            var mailKitOptions = configuration.GetSection("Email").Get<MailKitOptions>();
+
+            services.AddMailKit(config =>
+            {
+                config.UseMailKit(mailKitOptions);
+            });
             services.AddControllersWithViews();
 
         }

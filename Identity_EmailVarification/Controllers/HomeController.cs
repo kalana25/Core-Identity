@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using NETCore.MailKit.Core;
 using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,11 +15,15 @@ namespace Identity_EmailVarification.Controllers
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signinManager;
+        private readonly IEmailService emailService;
 
-        public HomeController(UserManager<IdentityUser> userManger,SignInManager<IdentityUser> signManger)
+        public HomeController(UserManager<IdentityUser> userManger,
+            SignInManager<IdentityUser> signManger,
+            IEmailService emalservice)
         {
             userManager = userManger;
             signinManager = signManger;
+            emailService = emalservice;
         }
         public IActionResult Index()
         {
@@ -49,11 +54,11 @@ namespace Identity_EmailVarification.Controllers
             var result = await userManager.CreateAsync(user, password);
             if(result.Succeeded)
             {
-                var signInResult = await signinManager.PasswordSignInAsync(user, password, false, false);
-                if(signInResult.Succeeded)
-                {
-                    return RedirectToAction("Index");
-                }
+                //generation of email token
+                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                var link = Url.Action(nameof(VarifyEmail), "Home", new { userId = user.Id, code },Request.Scheme,Request.Host.ToString());
+                await emailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify",$"<a href=\"{link}\">Varify Email</a>",true);
+                return RedirectToAction("EmailVarification");
             }
             return RedirectToAction("Index");
         }
@@ -86,6 +91,23 @@ namespace Identity_EmailVarification.Controllers
         {
             await signinManager.SignOutAsync();
             return RedirectToAction("Index");
+        }
+
+        public IActionResult EmailVarification => View();
+
+        public async Task<ActionResult> VarifyEmail(string userId,string code)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if(user==null)
+            {
+                return BadRequest();
+            }
+            var result = await userManager.ConfirmEmailAsync(user, code);
+            if(result.Succeeded)
+            {
+                return View();
+            }
+            return BadRequest();
         }
     }
 }
