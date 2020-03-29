@@ -17,17 +17,17 @@ namespace Identity_EmailVarification.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signinManager;
         private readonly IEmailService emailService;
-        private readonly IGmailService gmailService;
+        //private readonly IGmailService gmailService;
 
         public HomeController(UserManager<IdentityUser> userManger,
             SignInManager<IdentityUser> signManger,
-            IGmailService gmalServce,
+            //IGmailService gmalServce,
             IEmailService emalservice)
         {
             userManager = userManger;
             signinManager = signManger;
             emailService = emalservice;
-            gmailService = gmalServce;
+            //gmailService = gmalServce;
         }
         public IActionResult Index()
         {
@@ -61,8 +61,8 @@ namespace Identity_EmailVarification.Controllers
                 //generation of email token
                 var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 var link = Url.Action(nameof(VarifyEmail), "Home", new { userId = user.Id, code },Request.Scheme,Request.Host.ToString());
-                //await emailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify",$"<a href=\"{link}\">Varify Email</a>",true);
-                gmailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify", $"<a href=\"{link}\">Varify Email</a>");
+                await emailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify",$"<a href=\"{link}\">Varify Email</a>",true);
+                //gmailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify", $"<a href=\"{link}\">Varify Email</a>");
                 return RedirectToAction("EmailVarification");
             }
             return RedirectToAction("Index");

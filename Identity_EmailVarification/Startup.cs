@@ -29,13 +29,13 @@ namespace Identity_EmailVarification
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var gmailOptions = configuration.GetSection("Gmail").Get<Gmail>();
+            //var gmailOptions = configuration.GetSection("Gmail").Get<Gmail>();
 
-            services.AddGmailService(opts=>
-            {
-                opts.SourceEmail = gmailOptions.SourceEmail;
-                opts.Password = gmailOptions.Password;
-            });
+            //services.AddGmailService(opts=>
+            //{
+            //    opts.SourceEmail = gmailOptions.SourceEmail;
+            //    opts.Password = gmailOptions.Password;
+            //});
 
             services.AddDbContext<AppDbContext>(config =>
             {
