@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using NETCore.MailKit.Core;
 using Microsoft.AspNetCore.Authorization;
+using Identity_EmailVarification.Services;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,14 +17,17 @@ namespace Identity_EmailVarification.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly SignInManager<IdentityUser> signinManager;
         private readonly IEmailService emailService;
+        private readonly IGmailService gmailService;
 
         public HomeController(UserManager<IdentityUser> userManger,
             SignInManager<IdentityUser> signManger,
+            IGmailService gmalServce,
             IEmailService emalservice)
         {
             userManager = userManger;
             signinManager = signManger;
             emailService = emalservice;
+            gmailService = gmalServce;
         }
         public IActionResult Index()
         {
@@ -57,7 +61,8 @@ namespace Identity_EmailVarification.Controllers
                 //generation of email token
                 var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 var link = Url.Action(nameof(VarifyEmail), "Home", new { userId = user.Id, code },Request.Scheme,Request.Host.ToString());
-                await emailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify",$"<a href=\"{link}\">Varify Email</a>",true);
+                //await emailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify",$"<a href=\"{link}\">Varify Email</a>",true);
+                gmailService.SendAsync("kalana.mahaarachchi@qualitapps.com", "Email Varify", $"<a href=\"{link}\">Varify Email</a>");
                 return RedirectToAction("EmailVarification");
             }
             return RedirectToAction("Index");
@@ -93,7 +98,10 @@ namespace Identity_EmailVarification.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult EmailVarification => View();
+        public IActionResult EmailVarification ()
+        {
+            return View();
+        }
 
         public async Task<ActionResult> VarifyEmail(string userId,string code)
         {
